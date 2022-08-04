@@ -1,0 +1,151 @@
+#!/bin/bash
+
+help() {
+  echo -e './delv_dnssec [-f <dns-server-txt-file> -u <fqdn-to-check-dnssec>]\n'
+  echo -e '-f\t--file\t\t Hand over path to DNS Server file fomratted in 2 rows e.g. Vodafone_Munich 141.1.27.249. Mandatory'
+  echo -e '-r\t--repeat\t Set the number of repetitions, how often a single query should be repeated when first try fails to resolve. Default 3.'
+  echo -e '\t\t\t Increases the reliability of queries. Must be at least 1.'
+  echo -e '-t\t--testquery\t Test query to test if DNS server IP is able to resolve something - default is google.com'
+  echo -e '-u\t--url\t\t DNSSEC A record FQDN from DNSSEC domain you want to verify if DNS server can resolve DNSSEC - e.g. dnssec.com (A record) - Mandatory'
+  echo -e '-d\t--timedistance\t Set the time interval between each DNSSEC query from the DNS server list in seconds. Default 3 seconds.'
+  echo -e '\nMake sure you installed delv via bind-utils!'
+  exit 0
+}
+
+usage() {
+  echo "For help, use -h or --help"
+}
+
+for i in "$@"; do
+  shift
+  case "$i" in
+    "--file")           set -- "$@" "-f" ;;
+    "--repeat")         set -- "$@" "-r" ;;
+    "--testquery")      set -- "$@" "-t" ;;
+    "--url")            set -- "$@" "-u" ;;
+    "--timedistance")   set -- "$@" "-d" ;;
+    "--help")           set -- "$@" "-h" ;;
+    *)                  set -- "$@" "$i" ;;
+  esac
+done
+
+while getopts ":f: r: t: u: d: :h" option; do
+  case $option in
+    f)  file=${OPTARG}
+        file=$(realpath $file)
+        ;;
+    r)  repeat=${OPTARG}
+        ;;
+    t)  testquery=${OPTARG}
+        ;;
+    u)  url=${OPTARG}
+        ;;
+    d)  timedistance=${OPTARG}
+        ;;
+    h)  help
+        exit 0
+        ;;
+    *)  usage
+        exit 1
+        ;;
+  esac
+done
+
+if [ -z $file ]; then
+  usage
+  exit 1
+fi
+
+if [ -z $repeat ]; then
+  repeat=3
+fi
+
+if [ -z $testquery ]; then
+  testquery="google.com"
+fi
+
+if [ -z $url ]; then
+  usage
+  exit 1
+fi
+
+if [ -z $timedistance ]; then
+  timedistance=3
+fi
+
+count=$(echo $(seq $repeat))
+
+readarray -t txt_lines < <(sed -e '/^#/d' -e '/^$/d' $file)
+
+for i in "${txt_lines[@]}"; do
+
+  ip=$(echo $i | cut -d " " -f2)
+
+  for j in $count; do
+    if dig @$ip $testquery | grep 'ANSWER SECTION' -A2 | grep -q '\bIN.*A[^[0-9].*[0-9]$'; then
+      dns_server_ip="Successful: $testquery"
+      break
+    else
+      sleep $repeat
+      dns_server_ip=""
+    fi
+  done
+
+  if [ ! -z "$dns_server_ip" ]; then
+
+    for j in $count; do
+      readarray -t dig_output < <(dig @$ip +dnssec $url | grep 'ANSWER SECTION' -A2)
+
+      if echo ${dig_output[1]} | grep -q '\bIN.*A[^[0-9].*[0-9]$'; then
+        resolve_test="Successful: $url"
+        break
+      else
+        sleep $repeat
+        resolve_test=""
+      fi
+    done
+
+    if [ ! -z "$resolve_test" ]; then
+
+      if echo ${dig_output[2]} | grep -q 'RRSIG'; then
+
+        dnssec_working="DNSSEC supported"
+
+        # Display not DNSSEC records but validate
+        for j in $count; do
+          if delv +nodnssec @$ip $url 2>/dev/null | grep -q 'fully validated'; then
+            dnssec="Fully validated"
+            break
+          else
+            sleep $repeat
+            dnssec=""
+          fi
+        done
+
+        # dnssec=$(delv +nodnssec @$ip $url 2>/dev/null| head -1 | sed 's/^; //g')
+
+        if [ -z "$dnssec" ]; then
+          echo -e "$i; $dns_server_ip; $resolve_test; $dnssec_working; \e[0;31mNot validated\e[0m"
+        else
+          echo "$i; $dns_server_ip; $resolve_test; $dnssec_working; ${dnssec^}"
+        fi
+
+      else
+        dnssec_working="DNSSEC not supported"
+        echo -e "$i; $dns_server_ip; $resolve_test; \e[0;31m$dnssec_working\e[0m"
+      fi
+
+    else
+      resolve_test="Unsuccessful: $url"
+      echo -e  "$i; $dns_server_ip; \e[0;31m$resolve_test\e[0m"
+    fi
+  else
+    dns_server_ip="Unsuccessful: $testquery"
+    echo -e "$i; \e[0;31m$dns_server_ip\e[0m"
+  fi
+
+  sleep $timedistance
+
+done
+
+exit 0
