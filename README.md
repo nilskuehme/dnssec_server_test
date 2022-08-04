@@ -22,7 +22,7 @@ Google_Public 8.8.8.8; Successful: amazon.com; Successful: dnssec.com; DNSSEC su
 Cloudflare 1.1.1.1; Successful: amazon.com; Successful: dnssec.com; DNSSEC supported; Fully validated
 OpenDNS 208.67.222.222; Successful: amazon.com; Successful: dnssec.com; DNSSEC supported; Fully validated
 CyberGhost 38.132.106.139; Successful: amazon.com; Successful: dnssec.com; DNSSEC supported; Fully validated
-Hagenberg 193.186.170.50; Successful: google.com; Successful: dnssec.com; DNSSEC not supported
+Hagenberg 193.186.170.50; Successful: amazon.com; Successful: dnssec.com; DNSSEC not supported
 ```
 
 ## Requirements
