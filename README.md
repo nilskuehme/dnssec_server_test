@@ -31,6 +31,7 @@ The script uses `delv`, make sure `bind-utils` are installed.
 
 ## Considerations
 - Make sure the DNS server list has only two columns 1. name 2. ip address. The name can be set as desired but without empty spaces.
+- Comments in server list can be set and will be ignored while execution as well as empty lines.
 - DNS server file can be handed over while using absolute or absolute path.
 - It can only one A record tested at once.  
 
