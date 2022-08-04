@@ -1,13 +1,14 @@
 #!/bin/bash
 
 help() {
-  echo -e './delv_dnssec [-f <dns-server-txt-file> -u <fqdn-to-check-dnssec>]\n'
+  echo -e './dnssec_dns_server_test [-f <dns-server-txt-file> -u <fqdn-to-check-dnssec>]\n'
   echo -e '-f\t--file\t\t Hand over path to DNS Server file fomratted in 2 rows e.g. Vodafone_Munich 141.1.27.249. Mandatory'
   echo -e '-r\t--repeat\t Set the number of repetitions, how often a single query should be repeated when first try fails to resolve. Default 3.'
   echo -e '\t\t\t Increases the reliability of queries. Must be at least 1.'
   echo -e '-t\t--testquery\t Test query to test if DNS server IP is able to resolve something - default is google.com'
   echo -e '-u\t--url\t\t DNSSEC A record FQDN from DNSSEC domain you want to verify if DNS server can resolve DNSSEC - e.g. dnssec.com (A record) - Mandatory'
   echo -e '-d\t--timedistance\t Set the time interval between each DNSSEC query from the DNS server list in seconds. Default 3 seconds.'
+  echo -e '-h\t--help\t\t Show this menu.'
   echo -e '\nMake sure you installed delv via bind-utils!'
   exit 0
 }

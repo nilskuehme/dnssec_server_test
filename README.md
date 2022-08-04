@@ -4,7 +4,7 @@ A script to test A records from a zone where DNSSEC is enabled using a list of D
 
 ## Usage
 ```
-./delv_dnssec [-f <dns-server-txt-file> -u <fqdn-to-check-dnssec>]
+./dnssec_dns_server_test [-f <dns-server-txt-file> -u <fqdn-to-check-dnssec>]
 
 -f	--file		 Hand over path to DNS Server file fomratted in 2 rows e.g. Vodafone_Munich 141.1.27.249. Mandatory
 -r	--repeat	 Set the number of repetitions, how often a single query should be repeated when first try fails to resolve. Default 3.
