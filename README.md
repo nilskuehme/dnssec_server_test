@@ -28,3 +28,19 @@ Hagenberg 193.186.170.50; Successful: google.com; Successful: test.awin-dnssec.c
 - Make sure the DNS server list has only two columns 1. name 2. ip address. The name can be set as desired but without empty spaces.
 - DNS server file can be handed over while using absolute or absolute path.
 - It can only one A record tested at once.  
+
+## Example DNS Server list
+```
+Google_Public 8.8.8.8
+Cloudflare 1.1.1.1
+OpenDNS 208.67.222.222
+CyberGhost 38.132.106.139
+Quad9 9.9.9.9
+DNS_Watch 84.200.69.80
+Yandex_DNS 77.88.8.88
+Neustar_DNS 156.154.70.5
+CleanBrowsing 185.228.168.9
+SafeServer 198.54.117.10
+Safe_DNS 195.46.39.39
+AdGuard 176.103.130.130
+```
