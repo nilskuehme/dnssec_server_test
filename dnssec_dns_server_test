@@ -123,8 +123,6 @@ for i in "${txt_lines[@]}"; do
           fi
         done
 
-        # dnssec=$(delv +nodnssec @$ip $url 2>/dev/null| head -1 | sed 's/^; //g')
-
         if [ -z "$dnssec" ]; then
           echo -e "$i; $dns_server_ip; $resolve_test; $dnssec_working; \e[0;31mNot validated\e[0m"
         else
