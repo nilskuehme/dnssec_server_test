@@ -12,6 +12,7 @@ A script to test A records from a zone where DNSSEC is enabled using a list of D
 -t	--testquery	 Test query to test if DNS server IP is able to resolve something - default is google.com
 -u	--url		 DNSSEC A record FQDN from DNSSEC domain you want to verify if DNS server can resolve DNSSEC - e.g. dnssec.com (A record) - Mandatory
 -d	--timedistance	 Set the time interval between each DNSSEC query from the DNS server list in seconds. Default 3 seconds.
+-h	--help		 Show this menu.
 ```
 
 Example with all parameters:
@@ -23,6 +24,10 @@ OpenDNS 208.67.222.222; Successful: amazon.com; Successful: dnssec.com; DNSSEC s
 CyberGhost 38.132.106.139; Successful: amazon.com; Successful: dnssec.com; DNSSEC supported; Fully validated
 Hagenberg 193.186.170.50; Successful: google.com; Successful: test.awin-dnssec.com; DNSSEC not supported
 ```
+
+## Requirements
+The script uses `delv`, make sure `bind-utils` are installed. 
+
 
 ## Considerations
 - Make sure the DNS server list has only two columns 1. name 2. ip address. The name can be set as desired but without empty spaces.
