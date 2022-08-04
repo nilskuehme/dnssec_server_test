@@ -94,7 +94,7 @@ for i in "${txt_lines[@]}"; do
   if [ ! -z "$dns_server_ip" ]; then
 
     for j in $count; do
-      readarray -t dig_output < <(dig @$ip +dnssec $url | grep 'ANSWER SECTION' -A2)
+      readarray -t dig_output < <(dig @$ip +dnssec $url | sed -n '/ANSWER SECTION/,${p;/^$/q}')
 
       if echo ${dig_output[1]} | grep -q '\bIN.*A[^[0-9].*[0-9]$'; then
         resolve_test="Successful: $url"
@@ -107,7 +107,7 @@ for i in "${txt_lines[@]}"; do
 
     if [ ! -z "$resolve_test" ]; then
 
-      if echo ${dig_output[2]} | grep -q 'RRSIG'; then
+      if echo ${dig_output[@]} | grep -q 'RRSIG'; then
 
         dnssec_working="DNSSEC supported"
 
