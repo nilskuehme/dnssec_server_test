@@ -89,7 +89,7 @@ readarray -t txt_lines < <(sed -e '/^#/d' -e '/^$/d' $file)
 for i in "${txt_lines[@]}"; do
 
   if [ ! -z "$timestamp" ]; then
-    timestamp=$(date +"%H:%M:%S %Y")
+    timestamp=$(date +"%H:%M:%S")
   fi
 
   ip=$(echo $i | cut -d " " -f2)
