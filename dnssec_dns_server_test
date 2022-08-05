@@ -8,6 +8,7 @@ help() {
   echo -e '-t\t--testquery\t Test query to test if DNS server IP is able to resolve something - default is google.com'
   echo -e '-u\t--url\t\t DNSSEC A record FQDN from DNSSEC domain you want to verify if DNS server can resolve DNSSEC - e.g. dnssec.com (A record) - Mandatory'
   echo -e '-d\t--timedistance\t Set the time interval between each DNSSEC query from the DNS server list in seconds. Default 3 seconds.'
+  echo -e '-s\t--timestamp\t Add time stamps to output. Just the flag is needed.'
   echo -e '-h\t--help\t\t Show this menu.'
   echo -e '\nMake sure you installed delv via bind-utils!'
   exit 0
@@ -25,12 +26,13 @@ for i in "$@"; do
     "--testquery")      set -- "$@" "-t" ;;
     "--url")            set -- "$@" "-u" ;;
     "--timedistance")   set -- "$@" "-d" ;;
+    "--timestamp")      set -- "$@" "-s" ;;
     "--help")           set -- "$@" "-h" ;;
     *)                  set -- "$@" "$i" ;;
   esac
 done
 
-while getopts ":f: r: t: u: d: :h" option; do
+while getopts ":f: r: t: u: d: :s :h" option; do
   case $option in
     f)  file=${OPTARG}
         file=$(realpath $file)
@@ -45,6 +47,8 @@ while getopts ":f: r: t: u: d: :h" option; do
         ;;
     h)  help
         exit 0
+        ;;
+    s)  timestamp=true
         ;;
     *)  usage
         exit 1
@@ -74,11 +78,19 @@ if [ -z $timedistance ]; then
   timedistance=3
 fi
 
+format() {
+  { echo -e $1 | sed 's/^//g'; }
+}
+
 count=$(echo $(seq $repeat))
 
 readarray -t txt_lines < <(sed -e '/^#/d' -e '/^$/d' $file)
 
 for i in "${txt_lines[@]}"; do
+
+  if [ ! -z "$timestamp" ]; then
+    timestamp=$(date +"%H:%M:%S %Y")
+  fi
 
   ip=$(echo $i | cut -d " " -f2)
 
@@ -124,23 +136,23 @@ for i in "${txt_lines[@]}"; do
         done
 
         if [ -z "$dnssec" ]; then
-          echo -e "$i; $dns_server_ip; $resolve_test; $dnssec_working; \e[0;31mNot validated\e[0m"
+          format "${timestamp} $i; $dns_server_ip; $resolve_test; $dnssec_working; \e[0;31mNot validated\e[0m"
         else
-          echo "$i; $dns_server_ip; $resolve_test; $dnssec_working; ${dnssec^}"
+          format "${timestamp} $i; $dns_server_ip; $resolve_test; $dnssec_working; ${dnssec^}"
         fi
 
       else
         dnssec_working="DNSSEC not supported"
-        echo -e "$i; $dns_server_ip; $resolve_test; \e[0;31m$dnssec_working\e[0m"
+        format "${timestamp} $i; $dns_server_ip; $resolve_test; \e[0;31m$dnssec_working\e[0m"
       fi
 
     else
       resolve_test="Unsuccessful: $url"
-      echo -e  "$i; $dns_server_ip; \e[0;31m$resolve_test\e[0m"
+      format  "${timestamp} $i; $dns_server_ip; \e[0;31m$resolve_test\e[0m"
     fi
   else
     dns_server_ip="Unsuccessful: $testquery"
-    echo -e "$i; \e[0;31m$dns_server_ip\e[0m"
+    format "${timestamp} $i; \e[0;31m$dns_server_ip\e[0m"
   fi
 
   sleep $timedistance
